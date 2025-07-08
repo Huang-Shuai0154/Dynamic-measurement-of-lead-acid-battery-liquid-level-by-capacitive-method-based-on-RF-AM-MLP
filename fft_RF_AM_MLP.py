@@ -128,9 +128,9 @@ y = all_h.flatten()
 
 X, y = shuffle(X, y, random_state=42)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.001, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.00001, random_state=42)
 
-rf_model = RandomForestRegressor(n_estimators=10, random_state=42)
+rf_model = RandomForestRegressor(n_estimators=20, random_state=42)
 rf_model.fit(X_train, y_train)
 X_train_leaf = rf_model.apply(X_train)
 X_test_leaf = rf_model.apply(X_test)
@@ -162,7 +162,7 @@ class MLPWithAttention(nn.Module):
         self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, 1)
-        self.dropout = nn.Dropout(0.3)
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, x):
         x, attn_scores = self.attention(x)
@@ -344,6 +344,6 @@ print(f"平均绝对误差 (MAE): {mae_40:.4f}")
 print(f"决定系数 (R²): {r2_40:.4f}")
 print(f"平均绝对百分比误差 (MAPE): {mape_40:.2f}%")
 
-torch.save(model.state_dict(), "rf_attention_model.pth")
-joblib.dump(rf_model, "random_forest_model.pkl")
-joblib.dump(scaler_rf, "scaler_rf.pkl")
+torch.save(model.state_dict(), "rf_attention_model1.pth")
+joblib.dump(rf_model, "random_forest_model1.pkl")
+joblib.dump(scaler_rf, "scaler_rf1.pkl")
