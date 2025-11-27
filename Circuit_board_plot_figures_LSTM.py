@@ -10,8 +10,8 @@ import joblib
 import matplotlib.pyplot as plt
 import sys
 # --- 设置Matplotlib以支持中文黑体显示 ---
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
+# plt.rcParams['font.sans-serif'] = ['SimHei']
+# plt.rcParams['axes.unicode_minus'] = False
 # --- 全局绘图和配置设置 ---
 plt.rcParams.update({
     'font.size': 20, 'axes.titlesize': 22, 'axes.labelsize': 20,
@@ -25,18 +25,18 @@ PLOT_CONFIG = {
     "enable_zoom_plot": True,  # 是否绘制局部放大图
     # 您可以在这里为每个测试集自定义想要放大的“样本点”范围
     "zoom_ranges": {
-        # "slow rate": (114, 134),  # (起始样本点, 结束样本点)
-        # "medium rate": (114, 134),
-        # "fast rate": (60, 80),
-        # "30℃":(60, 80),
-        # "25℃": (60, 80),
-        # "15℃":(46, 66),
-        "慢速": (114, 134),  # (起始样本点, 结束样本点)
-        "中速": (114, 134),
-        "快速": (60, 80),
-        "30℃": (60, 80),
+        "slow rate": (114, 134),  # (起始样本点, 结束样本点)
+        "medium rate": (114, 134),
+        "fast rate": (60, 80),
+        "30℃":(60, 80),
         "25℃": (60, 80),
-        "15℃": (46, 66),
+        "15℃":(46, 66),
+        # "慢速": (114, 134),  # (起始样本点, 结束样本点)
+        # "中速": (114, 134),
+        # "快速": (60, 80),
+        # "30℃": (60, 80),
+        # "25℃": (60, 80),
+        # "15℃": (46, 66),
     }
 }
 
@@ -200,17 +200,17 @@ def plot_predictions_full(y_true, predictions_dict, title):
     print(f"绘制 {title} 的完整预测对比图...")
     time_values = np.arange(len(y_true)) * 0.22
     fig, ax = plt.subplots(figsize=(10, 7.5))
-    # ax.plot(time_values, y_true, label='True level', color='black', linewidth=4, zorder=10)
-    ax.plot(time_values, y_true, label='真实值', color='black', linewidth=4, zorder=10)
+    ax.plot(time_values, y_true, label='True level', color='black', linewidth=4, zorder=10)
+    # ax.plot(time_values, y_true, label='真实值', color='black', linewidth=4, zorder=10)
     for model_name, preds in predictions_dict.items():
         if model_name in model_color:
             ax.plot(time_values, preds, label=model_name, color=model_color[model_name], linewidth=4, alpha=0.8)
-    # ax.set_title(f"Liquid level descent at {title}", fontsize=20)
-    # ax.set_xlabel('Time (s)', fontsize=20);
-    # ax.set_ylabel('Liquid level (mm)', fontsize=20)
-    ax.set_title(f"环境温度{title}", fontsize=20)
-    ax.set_xlabel('时间 (s)', fontsize=20);
-    ax.set_ylabel('液位 (mm)', fontsize=20)
+    ax.set_title(f"Liquid level descent at {title}", fontsize=20)
+    ax.set_xlabel('Time (s)', fontsize=20);
+    ax.set_ylabel('Liquid level (mm)', fontsize=20)
+    # ax.set_title(f"环境温度{title}", fontsize=20)
+    # ax.set_xlabel('时间 (s)', fontsize=20);
+    # ax.set_ylabel('液位 (mm)', fontsize=20)
     ax.legend(fontsize=20, loc='lower left');
     ax.tick_params(axis='both', which='major', labelsize=20)
     ax.grid(True);
@@ -250,12 +250,12 @@ def plot_residuals_full(y_true, predictions_dict, title):
             residuals = preds - y_true
             ax.plot(time_values, residuals, label=model_name, alpha=0.7, color=model_color[model_name], linewidth=4)
     ax.axhline(0, color='black', linestyle='--', linewidth=1.5)  # 添加y=0的参考线
-    # ax.set_title(f"Liquid level descent at {title}", fontsize=22)
-    # ax.set_xlabel('Time (s)', fontsize=20);
-    # ax.set_ylabel('Error (mm)', fontsize=20)
-    ax.set_title(f"环境温度{title}", fontsize=22)
-    ax.set_xlabel('时间 (s)', fontsize=20);
-    ax.set_ylabel('误差(mm)', fontsize=20)
+    ax.set_title(f"Liquid level descent at {title}", fontsize=22)
+    ax.set_xlabel('Time (s)', fontsize=20);
+    ax.set_ylabel('Error (mm)', fontsize=20)
+    # ax.set_title(f"环境温度{title}", fontsize=22)
+    # ax.set_xlabel('时间 (s)', fontsize=20);
+    # ax.set_ylabel('误差(mm)', fontsize=20)
     ax.legend(fontsize=20, loc='lower right');
     ax.tick_params(axis='both', which='major', labelsize=20)
     ax.grid(True);
@@ -301,33 +301,21 @@ def main():
         print(f"加载模型或scaler时出错: {e}");
         sys.exit(1)
 
-    # # 定义测试数据集 (请确保路径正确)
-    # test_datasets = {
-    #     "slow rate": [{"file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
-    #                 "ranges": [("Sheet7","CZ87:CZ555", "DA87:DA555")]}],
-    #     "medium rate": [{"file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
-    #                 "ranges": [("Sheet7","CR83:CR436", "CS83:CS436")]}],
-    #     "fast rate": [{"file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
-    #                  "ranges": [("Sheet7","BB80:BB380","BC80:BC380")]}],
-    #     "18℃": [{"file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
-    #                  "ranges": [("Sheet7", "BN77:BN380", "BO77:BO380")]}],
-    #     "35℃": [{"file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
-    #                         "ranges": [("Sheet7", "R78:R384", "S78:S384")]}]
-    # }
+
     # 定义测试数据集 (请确保路径正确)
     test_datasets = {
-        # "slow rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-        #             "ranges": [("Sheet3", "AS36:AS829", "AT36:AT829")]}],
-        # "medium rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-        #             "ranges": [("Sheet2","BB60:BB576", "BC60:BC576")]}],
-        # "fast rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-        #              "ranges": [("Sheet1","O41:O371","P41:P371")]}],
-        "慢速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-                       "ranges": [("Sheet3", "AS1:AS793", "AT1:AT793")]}],
-        "中速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-                         "ranges": [("Sheet2", "BB1:BB516", "BC1:BC516")]}],
-        "快速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
-                       "ranges": [("Sheet1", "O1:O330", "P1:P330")]}],
+        "slow rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+                    "ranges": [("Sheet3", "AS1:AS793", "AT1:AT793")]}],
+        "medium rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+                    "ranges": [("Sheet2","BB1:BB516", "BC1:BC516")]}],
+        "fast rate": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+                     "ranges": [("Sheet1","O1:O330", "P1:P330")]}],
+        # "慢速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+        #                "ranges": [("Sheet3", "AS1:AS793", "AT1:AT793")]}],
+        # "中速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+        #                  "ranges": [("Sheet2", "BB1:BB516", "BC1:BC516")]}],
+        # "快速": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
+        #                "ranges": [("Sheet1", "O1:O330", "P1:P330")]}],
         "15℃": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
                  "ranges": [("Sheet1", "BN1:BN336", "BO1:BO336")]}],
         "25℃": [{"file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",
@@ -408,4 +396,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
