@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from matplotlib.ticker import FormatStrFormatter
 # --- 设置Matplotlib以支持中文黑体显示 ---
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
+# plt.rcParams['font.sans-serif'] = ['SimHei']
+# plt.rcParams['axes.unicode_minus'] = False
 # 读取 Excel 文件中液位和电容数据的函数
 def read_excel_range(file_path, sheet_name, capacitance_range, level_range):
     wb = openpyxl.load_workbook(file_path, data_only=True)
@@ -83,7 +83,6 @@ def plot_fit(data_dict):
 data_dict = [
     {
         "file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
-        # "ranges": [("Sheet3", "O254:O3683", "P254:P3683")],
         "ranges": [("Sheet3", "E1:E2221", "F1:F2221")],
         "label": "Linear static",  # 第一组数据标注
         "color": "blue",     # 蓝色
@@ -103,4 +102,5 @@ data_dict = [
 
 # 调用绘图函数进行拟合和绘制
 plot_fit(data_dict)
+
 
