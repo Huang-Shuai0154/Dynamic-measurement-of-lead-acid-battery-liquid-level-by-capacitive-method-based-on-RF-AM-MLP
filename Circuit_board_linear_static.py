@@ -65,13 +65,13 @@ def plot_fit(data_dict):
         # plt.plot(capacitance, a * capacitance + b, label=f'Fitted {data["label"]}: h = {a:.4f} * C + {b:.4f}', color=data["color"], linestyle='--', linewidth=3)
 
     # 设置图表标签和标题
-    # plt.title("Static measurement h-C curve", fontsize=20)
-    plt.title("静态测量液位-电容曲线", fontsize=20)
+    plt.title("Static measurement h-C curve", fontsize=20)
+    # plt.title("静态测量液位-电容曲线", fontsize=20)
     # plt.title("", fontsize=22)
-    # plt.xlabel('Capacitance (pF)', fontsize=20)
-    # plt.ylabel('Liquid level (mm)', fontsize=20)
-    plt.xlabel('电容 (pF)', fontsize=20)
-    plt.ylabel('液位 (mm)', fontsize=20)
+    plt.xlabel('Capacitance (pF)', fontsize=20)
+    plt.ylabel('Liquid level (mm)', fontsize=20)
+    # plt.xlabel('电容 (pF)', fontsize=20)
+    # plt.ylabel('液位 (mm)', fontsize=20)
     # plt.legend(fontsize=20)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
@@ -80,26 +80,27 @@ def plot_fit(data_dict):
     plt.show()
 
 # # 数据字典：包含文件路径、范围、标签和颜色
-# data_dict = [
-#     {
-#         "file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
-#         # "ranges": [("Sheet3", "O254:O3683", "P254:P3683")],
-#         "ranges": [("Sheet3", "E576:E2797", "F576:F2797")],
-#         "label": "Linear static",  # 第一组数据标注
-#         "color": "blue",     # 蓝色
-#     },
-#     # 可以继续添加其他数据组
-# ]
-# 数据字典：包含文件路径、范围、标签和颜色
 data_dict = [
     {
-        "file_path": "C:/Users/hs/Desktop/Sensors_battery1.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
-        "ranges": [("Sheet3", "E1:E2221", "F1:F2221"),],
-        "label": "静态测量",  # 第一组数据标注
+        "file_path": "C:/Users/hs/Desktop/Sensors_battery.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
+        # "ranges": [("Sheet3", "O254:O3683", "P254:P3683")],
+        "ranges": [("Sheet3", "E1:E2221", "F1:F2221")],
+        "label": "Linear static",  # 第一组数据标注
         "color": "blue",     # 蓝色
     },
     # 可以继续添加其他数据组
 ]
+# 数据字典：包含文件路径、范围、标签和颜色
+# data_dict = [
+#     {
+#         "file_path": "C:/Users/hs/Desktop/Sensors_battery1.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
+#         "ranges": [("Sheet3", "E1:E2221", "F1:F2221"),],
+#         "label": "静态测量",  # 第一组数据标注
+#         "color": "blue",     # 蓝色
+#     },
+#     # 可以继续添加其他数据组
+# ]
 
 # 调用绘图函数进行拟合和绘制
 plot_fit(data_dict)
+
