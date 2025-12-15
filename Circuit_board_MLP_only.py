@@ -64,20 +64,21 @@ def calculate_amplitude_and_frequency_fft(C, window_size=2, sample_rate=1.0):
 
     return np.array(frequencies), np.array(amplitudes)
 
-data_sources = [
-    {
-        "file_path": "C:/Users/hs/Desktop/Training data.xlsx",
-        "ranges": [
-            ("Sheet1", "B2:B2797", "C2:C2797"),
-            ("Sheet1", "H2:H2691", "I2:I2691"),
-            ("Sheet1", "N2:N3809", "O2:O3809"),
-            ("Sheet1", "T2:T2289", "U2:U2289"),
-            ("Sheet1", "Z2:Z6328", "AA2:AA6328"),
-            ("Sheet1", "AF2:AF2582", "AG2:AG2582"),
-            ("Sheet1", "AL2:AL4265", "AM2:AM4265")
-        ]
-    },
-]
+data_sources = [{
+    "file_path": "C:/Users/hs/Desktop/Sensor.xlsx",  # 请确保路径正确
+    "ranges": [
+        ("Sheet4", "A1:A1223", "D1:D1223"),
+        ("Sheet4", "G1:G1226", "J1:J1226"),
+        ("Sheet4", "M1:M1291", "P1:P1291"),
+        ("Sheet2", "A1:A2018", "D1:D2018"),
+        ("Sheet2", "M1:M2001", "P1:P2001"),
+        ("Sheet2", "S1:S1132", "V1:V1132"),
+        ("Sheet3", "A1:A4385", "D1:D4385"),
+        ("Sheet3", "G1:G4002", "J1:J4002"),
+        ("Sheet3", "M1:M3976", "P1:P3976"),
+
+    ]
+}]
 
 # 数据存储的列表
 all_amplitude = []  # 振幅
@@ -122,13 +123,14 @@ all_frequency = np.array(all_frequency).reshape(-1, 1)
 all_h = np.array(all_h)
 
 # 合并特征
-X = np.hstack((all_avg_C, all_delta_C_window, all_amplitude, all_frequency))  # 现在是电容平均值、变化量、振幅和频率作为特征
+# X = np.hstack((all_avg_C, all_delta_C_window, all_amplitude, all_frequency))  # 现在是电容平均值、变化量、振幅和频率作为特征
+X = np.hstack((all_avg_C, all_delta_C_window))  # 现在是电容平均值、变化量、振幅和频率作为特征
 # X = np.hstack((all_avg_C,))  # 现在是电容平均值、变化量、振幅和频率作为特征
 y = all_h.flatten()
 
 X, y = shuffle(X, y, random_state=42)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.00001, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.0001, random_state=42)
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -142,8 +144,8 @@ y_test_tensor = torch.tensor(y_test, dtype=torch.float32).view(-1)
 class MLPModel(nn.Module):
     def __init__(self, input_dim):
         super(MLPModel, self).__init__()
-        self.fc1 = nn.Linear(input_dim,128)
-        # self.fc2 = nn.Linear(256, 128)
+        self.fc1 = nn.Linear(input_dim,256)
+        self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, 1)
         self.dropout = nn.Dropout(0.2)
@@ -151,8 +153,8 @@ class MLPModel(nn.Module):
     def forward(self, x):
         x = F.leaky_relu(self.fc1(x))
         x = self.dropout(x)
-        # x = F.leaky_relu(self.fc2(x))
-        # x = self.dropout(x)
+        x = F.leaky_relu(self.fc2(x))
+        x = self.dropout(x)
         x = F.leaky_relu(self.fc3(x))
         x = self.fc4(x)
         return x
@@ -160,7 +162,7 @@ class MLPModel(nn.Module):
 input_dim = X_train_scaled.shape[1]
 model = MLPModel(input_dim)
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
 
 def train_model(model, X_train, y_train, epochs=400):
     model.train()
@@ -173,37 +175,79 @@ def train_model(model, X_train, y_train, epochs=400):
         if (epoch + 1) % 10 == 0:
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.4f}")
 
-train_model(model, X_train_tensor, y_train_tensor, epochs=400)
+train_model(model, X_train_tensor, y_train_tensor, epochs=600)
 
 model.eval()
 with torch.no_grad():
     nn_predictions = model(X_test_tensor).squeeze()
 
-validation_data_30 = [
+
+# smoothed_predictions = nn_predictions
+# smoothed_predictions = smoothed_predictions.cpu().numpy()  # 将 tensor 转换为 numpy 数组
+# print("X shape:", X.shape)
+# mse_smoothed = mean_squared_error(y_test, smoothed_predictions)
+# rmse_smoothed = np.sqrt(mse_smoothed)
+# mae_smoothed = mean_absolute_error(y_test, smoothed_predictions)
+# r2_smoothed = r2_score(y_test, smoothed_predictions)
+# mape_smoothed = np.mean(np.abs((y_test - smoothed_predictions) / y_test)) * 100
+
+# print("\n=== 卡尔曼滤波平滑后评估 ===")
+# print(f"决定系数 (R²): {r2_smoothed:.4f}")
+# print(f"均方误差 (MSE): {mse_smoothed:.4f}")
+# print(f"均方根误差 (RMSE): {rmse_smoothed:.4f}")
+# print(f"平均绝对误差 (MAE): {mae_smoothed:.4f}")
+# print(f"平均绝对百分比误差 (MAPE): {mape_smoothed:.2f}%")
+
+# validation_data_100 = [
+#     {
+#         "file_path": "C:/Users/hs/Desktop/battery_level.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
+#         "ranges": [
+#             ("Sheet7","BB80:BB380","BC80:BC380"),
+#         ]
+#     }
+# ]
+# validation_data_60 = [
+#     {
+#         "file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
+#         "ranges": [
+#             # ("Sheet2", "J176:J603", "L176:L603"),
+#             ("Sheet7","CR83:CR436", "CS83:CS436"),
+#         ]
+#     }
+# ]
+# validation_data_30 = [
+#     {
+#         "file_path": "C:/Users/hs/Desktop/battery_level.xlsx",
+#         "ranges": [
+#             ("Sheet7","CZ87:CZ555", "DA87:DA555"),
+#         ]
+#     }
+# ]
+
+validation_data_100 = [
     {
-        "file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",#You can put the file to your own desktop and change the path to your desktop accordingly
+        "file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
         "ranges": [
-            ("Sheet1", "B2:B6149", "C2:C6149"),
+            ("Sheet4", "S1:S1266", "V1:V1266"),
         ]
     }
 ]
 validation_data_60 = [
     {
-        "file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",
+        "file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
         "ranges": [
-            ("Sheet1", "I2:I3652", "J2:J3652"),
+            ("Sheet2", "G1:G2041", "J1:J2041"),
         ]
     }
 ]
-validation_data_100 = [
+validation_data_30 = [
     {
-        "file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",
+        "file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
         "ranges": [
-            ("Sheet1", "P2:P2703", "Q2:Q2703"),
+            ("Sheet3", "S1:S4074", "V1:V4074"),
         ]
     }
 ]
-
 def process_validation_data(data_sources, scaler, model, process_var=1, measurement_var=0.001):
     all_amplitude = []  # 振幅
     all_frequency = []  # 频率
@@ -246,7 +290,8 @@ def process_validation_data(data_sources, scaler, model, process_var=1, measurem
     all_h = np.array(all_h)
 
     # 合并特征
-    X_validation = np.hstack((all_avg_C, all_delta_C_window, all_amplitude, all_frequency))  # 现在是电容平均值、变化量、振幅和频率作为特征
+    # X_validation = np.hstack((all_avg_C, all_delta_C_window, all_amplitude, all_frequency))  # 现在是电容平均值、变化量、振幅和频率作为特征
+    X_validation = np.hstack((all_avg_C, all_delta_C_window))  # 现在是电容平均值、变化量、振幅和频率作为特征
     # X_validation = np.hstack((all_avg_C,))  # 现在是电容平均值、变化量、振幅和频率作为特征
     y_validation = all_h.flatten()
 
@@ -303,5 +348,5 @@ print(f"平均绝对误差 (MAE): {mae_40:.4f}")
 print(f"决定系数 (R²): {r2_40:.4f}")
 print(f"平均绝对百分比误差 (MAPE): {mape_40:.2f}%")
 
-torch.save(model.state_dict(), "no_rf_no_attention_model.pth")
-joblib.dump(scaler, "scaler_no_rf.pkl")
+torch.save(model.state_dict(), "No_RF_no_attention_model_Circuit.pth")
+joblib.dump(scaler, "Scaler_no_RF_Circuit.pkl")

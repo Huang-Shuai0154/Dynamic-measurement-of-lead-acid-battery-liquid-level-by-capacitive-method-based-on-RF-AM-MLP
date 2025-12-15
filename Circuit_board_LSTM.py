@@ -16,6 +16,7 @@ from torch.utils.data import TensorDataset, DataLoader
 # --- 设备检测 ---
 # 检查是否有可用的CUDA GPU，如果有就用GPU，否则用CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cpu")
 print(f"--- 将使用设备 (Using device): {device} ---")
 
 # --- 手动设置超参数 ---
@@ -25,8 +26,8 @@ HIDDEN_SIZE = 64
 NUM_LAYERS = 1
 DROPOUT_RATE = 0.3
 LEARNING_RATE = 0.01
-EPOCHS = 600
-BATCH_SIZE = 15000  # 设置批量大小
+EPOCHS = 200
+BATCH_SIZE = 500  # 设置批量大小
 
 # --- 全局绘图字体设置 ---
 plt.rcParams.update({
@@ -111,8 +112,6 @@ def process_data_and_get_features(data_sources):
                 features = np.vstack([
                     C[:min_len],
                     delta_C[:min_len],
-                    amplitude[:min_len],
-                    frequency[:min_len]
                 ]).T
                 all_features_list.append(features)
                 all_h_list.append(h[:min_len])
@@ -171,7 +170,7 @@ def evaluate_lstm_on_test_set(data_sources, scaler, model, seq_length, plot_titl
             frequency, amplitude = calculate_amplitude_and_frequency_fft(C, window_size=2)
             min_len = min(len(C), len(h), len(delta_C), len(frequency), len(amplitude))
             if min_len > 0:
-                features = np.vstack([C[:min_len], delta_C[:min_len], amplitude[:min_len], frequency[:min_len]]).T
+                features = np.vstack([C[:min_len], delta_C[:min_len]]).T
                 all_features_list_test.append(features)
                 all_h_list_test.append(h[:min_len])
 
@@ -218,13 +217,22 @@ def evaluate_lstm_on_test_set(data_sources, scaler, model, seq_length, plot_titl
 def main():
     # 加载并准备训练数据
     print("\n--- 正在加载完整的训练数据 ---")
+
     data_sources = [{
-        "file_path": "C:/Users/hs/Desktop/Training data.xlsx",  # 请确保路径正确
+        "file_path": "C:/Users/hs/Desktop/Sensor.xlsx",  # 请确保路径正确
         "ranges": [
-            ("Sheet1", "B2:B2797", "C2:C2797"), ("Sheet1", "H2:H2691", "I2:I2691"),
-            ("Sheet1", "N2:N3809", "O2:O3809"), ("Sheet1", "T2:T2289", "U2:U2289"),
-            ("Sheet1", "Z2:Z6328", "AA2:AA6328"), ("Sheet1", "AF2:AF2582", "AG2:AG2582"),
-            ("Sheet1", "AL2:AL4265", "AM2:AM4265")
+            ("Sheet4", "A1:A1223", "D1:D1223"),
+            ("Sheet4", "G1:G1226", "J1:J1226"),
+            ("Sheet4", "M1:M1291", "P1:P1291"),
+            ("Sheet2", "A1:A2018", "D1:D2018"),
+            # ("Sheet2", "G94:G2134", "J94:J2134"),
+            ("Sheet2", "M1:M2001", "P1:P2001"),
+            ("Sheet2", "S1:S1132", "V1:V1132"),
+            ("Sheet3", "A1:A4385", "D1:D4385"),
+            ("Sheet3", "G1:G4002", "J1:J4002"),
+            ("Sheet3", "M1:M3976", "P1:P3976"),
+            # ("Sheet3", "S78:S4300", "V78:V4300"),
+
         ]
     }]
     X_train, y_train = process_data_and_get_features(data_sources)
@@ -267,23 +275,27 @@ def main():
 
     # 在独立的测试集上评估模型
     print("\n--- 正在独立的测试集上评估模型性能 ---")
-    test_data_30rpm = [{"file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",
-                        "ranges": [("Sheet1", "B2:B6149", "C2:C6149")]}]
-    test_data_60rpm = [{"file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",
-                        "ranges": [("Sheet1", "I2:I3652", "J2:J3652")]}]
-    test_data_100rpm = [
-        {"file_path": "C:/Users/hs/Desktop/Constant rates validation data.xlsx",
-         "ranges": [("Sheet1", "P2:P2703", "Q2:Q2703")]}]
 
-    evaluate_lstm_on_test_set(test_data_30rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="30 rpm Test Set")
-    evaluate_lstm_on_test_set(test_data_60rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="60 rpm Test Set")
-    evaluate_lstm_on_test_set(test_data_100rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="100 rpm Test Set")
+    test_data_30rpm = [{"file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
+                        "ranges": [("Sheet3", "S1:S4074", "V1:V4074")]}]
+    test_data_60rpm = [{"file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
+                        "ranges": [("Sheet2", "G1:G2041", "J1:J2041")]}]
+    test_data_100rpm = [
+        {"file_path": "C:/Users/hs/Desktop/Sensor.xlsx",
+         "ranges": [("Sheet4", "S1:S1266", "V1:V1266")]}]
+
+    evaluate_lstm_on_test_set(test_data_30rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="Slow rate Test Set")
+    evaluate_lstm_on_test_set(test_data_60rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="Medium rate Test Set")
+    evaluate_lstm_on_test_set(test_data_100rpm, scaler, lstm_model, SEQUENCE_LENGTH, plot_title="Fast rate Test Set")
 
     # 保存模型
     print("\n--- 正在保存最终模型 ---")
-    torch.save(lstm_model.state_dict(), "manual_tuned_lstm_model.pth")
-    joblib.dump(scaler, "manual_lstm_scaler.pkl")
+    torch.save(lstm_model.state_dict(), "Circuit_board_lstm_model.pth")
+    joblib.dump(scaler, "Circuit_board_lstm_scaler.pkl")
     print("模型和scaler保存成功。")
+    # torch.save(lstm_model.state_dict(), "Circuit_board_lstm_model1.pth")
+    # joblib.dump(scaler, "Circuit_board_lstm_scaler1.pkl")
+    # print("模型和scaler保存成功。")
 
 
 if __name__ == "__main__":
